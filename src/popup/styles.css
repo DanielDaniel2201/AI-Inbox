@@ -1,6 +1,6 @@
 :root {
-  color: #201f27;
-  background: #fafafd;
+  color: #111;
+  background: #fff;
   font: 13px/1.35 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -9,7 +9,7 @@ body { margin: 0; min-width: 320px; }
 main { width: 320px; max-height: 460px; overflow: auto; }
 ul { list-style: none; margin: 0; padding: 4px 10px; }
 li { align-items: center; display: flex; min-height: 44px; }
-li + li { border-top: 1px solid #ecebf1; }
+li + li { border-top: 1px solid #ddd; }
 button { font: inherit; }
 .conversation {
   background: none;
@@ -24,9 +24,14 @@ button { font: inherit; }
   padding: 9px 4px;
   text-align: left;
 }
-.conversation:hover strong { color: #5848e8; }
-.conversation:focus-visible { outline: 2px solid #6d5dfc; outline-offset: 1px; }
-.provider-logo { border-radius: 5px; flex: 0 0 18px; height: 18px; width: 18px; }
+.conversation:hover strong { text-decoration: underline; }
+.conversation:focus-visible { outline: 2px solid #111; outline-offset: 1px; }
+.provider-logo {
+  border-radius: 5px;
+  flex: 0 0 18px;
+  height: 18px;
+  width: 18px;
+}
 strong {
   flex: 1;
   font-size: 13px;
@@ -35,9 +40,9 @@ strong {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-time { color: #858190; flex: none; font-size: 11px; }
+time { color: #666; flex: none; font-size: 11px; }
 .spinner {
-  color: #6d5dfc;
+  color: #111;
   flex: none;
   animation: spin .9s linear infinite;
   border: 1.5px dotted currentColor;
@@ -47,8 +52,10 @@ time { color: #858190; flex: none; font-size: 11px; }
   width: 12px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty { color: #858190; margin: 0; padding: 32px 14px 38px; text-align: center; }
 @media (prefers-color-scheme: dark) {
-  :root { background: #19181e; color: #f3f1f7; }
-  li { border-color: #34313d; }
+  :root { background: #111; color: #fff; }
+  li + li { border-color: #444; }
+  .conversation:focus-visible { outline-color: #fff; }
+  time { color: #aaa; }
+  .spinner { color: #fff; }
 }

@@ -76,9 +76,10 @@ async function updateAction(state: AIInboxState): Promise<void> {
   const pending = Object.keys(state.pendingTasks).length;
   const unread = Object.keys(state.inboxItems).length;
   const total = pending + unread;
+  await chrome.action.setPopup({ popup: total ? "popup.html" : "" });
 
   if (pending) {
-    await chrome.action.setBadgeBackgroundColor({ color: "#6d5dfc" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#111111" });
     await chrome.action.setBadgeText({ text: String(total) });
     const paint = () => {
       void chrome.action.setIcon({ imageData: actionIcon(true, iconFrame++) });
@@ -87,13 +88,13 @@ async function updateAction(state: AIInboxState): Promise<void> {
     iconAnimation = setInterval(paint, 200);
   } else {
     await chrome.action.setIcon({ imageData: actionIcon(false, 0) });
-    await chrome.action.setBadgeBackgroundColor({ color: "#6d5dfc" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#111111" });
     await chrome.action.setBadgeText({ text: unread ? String(unread) : "" });
   }
   await chrome.action.setTitle({
     title: pending
-      ? `AI Inbox · ${pending} working · ${unread} unread`
-      : `AI Inbox · ${unread} unread`,
+      ? `AI inbox · ${pending} working · ${unread} unread`
+      : `AI inbox · ${unread} unread`,
   });
 }
 
@@ -113,7 +114,7 @@ function drawActionIcon(size: number, spinning: boolean, frame: number): ImageDa
     for (let index = 0; index < 10; index++) {
       const angle = ((index + frame) / 10) * Math.PI * 2;
       context.globalAlpha = 0.2 + (index / 10) * 0.8;
-      context.fillStyle = "#6d5dfc";
+      context.fillStyle = "#111111";
       context.beginPath();
       context.arc(
         center + Math.cos(angle) * size * 0.39,
@@ -125,25 +126,34 @@ function drawActionIcon(size: number, spinning: boolean, frame: number): ImageDa
       context.fill();
     }
     context.globalAlpha = 1;
-    context.fillStyle = "#6d5dfc";
-    context.beginPath();
-    context.arc(center, center, size * 0.2, 0, Math.PI * 2);
-    context.fill();
   } else {
-    context.fillStyle = "#6d5dfc";
-    context.beginPath();
-    context.arc(center, center, size * 0.42, 0, Math.PI * 2);
-    context.fill();
-    context.strokeStyle = "white";
-    context.lineWidth = Math.max(1.5, size * 0.09);
-    context.beginPath();
-    context.moveTo(size * 0.27, size * 0.4);
-    context.lineTo(size * 0.5, size * 0.58);
-    context.lineTo(size * 0.73, size * 0.4);
-    context.stroke();
+    drawInbox(context, size);
   }
 
   return context.getImageData(0, 0, size, size);
+}
+
+// Lucide Inbox: https://lucide.dev/icons/inbox
+function drawInbox(context: OffscreenCanvasRenderingContext2D, size: number): void {
+  context.scale(size / 24, size / 24);
+  context.lineCap = "round";
+  context.lineJoin = "round";
+
+  for (const [color, width] of [["white", 4], ["#111111", 2]] as const) {
+    context.strokeStyle = color;
+    context.lineWidth = width;
+    context.beginPath();
+    context.moveTo(22, 12);
+    context.lineTo(16, 12);
+    context.lineTo(14, 15);
+    context.lineTo(10, 15);
+    context.lineTo(8, 12);
+    context.lineTo(2, 12);
+    context.stroke();
+    context.stroke(new Path2D(
+      "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+    ));
+  }
 }
 
 function validConversation(value: unknown, senderUrl?: string): value is ConversationInfo {

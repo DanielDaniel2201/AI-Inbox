@@ -38,17 +38,14 @@ export function App() {
     await chrome.runtime.sendMessage({ type: "open_item", id });
     window.close();
   };
+  if (tasks.length === 0) return null;
   return (
     <main>
-      {tasks.length === 0 ? (
-        <p className="empty">Nothing waiting.</p>
-      ) : (
-        <ul>
-          {tasks.map((task) => (
-            <TaskRow key={`${task.kind}:${task.value.id}`} task={task} open={open} />
-          ))}
-        </ul>
-      )}
+      <ul>
+        {tasks.map((task) => (
+          <TaskRow key={`${task.kind}:${task.value.id}`} task={task} open={open} />
+        ))}
+      </ul>
     </main>
   );
 }
