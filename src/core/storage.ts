@@ -2,6 +2,8 @@ import type { AIInboxState } from "./types";
 import { emptyState } from "./state";
 
 export const STORAGE_KEY = "aiInboxState";
+const STORAGE_VERSION_KEY = "aiInboxStateVersion";
+const STORAGE_VERSION = 2;
 let queue: Promise<unknown> = Promise.resolve();
 
 export async function readState(): Promise<AIInboxState> {
@@ -28,9 +30,16 @@ export function updateState(
 }
 
 export async function initializeState(): Promise<AIInboxState> {
-  const stored = await chrome.storage.local.get(STORAGE_KEY);
-  if (stored[STORAGE_KEY]) return readState();
-  const state = emptyState();
-  await chrome.storage.local.set({ [STORAGE_KEY]: state });
+  const stored = await chrome.storage.local.get([STORAGE_KEY, STORAGE_VERSION_KEY]);
+  const saved = stored[STORAGE_KEY] as Partial<AIInboxState> | undefined;
+  if (stored[STORAGE_VERSION_KEY] === STORAGE_VERSION && saved) return readState();
+
+  const state: AIInboxState = saved
+    ? { pendingTasks: {}, inboxItems: saved.inboxItems ?? {} }
+    : emptyState();
+  await chrome.storage.local.set({
+    [STORAGE_KEY]: state,
+    [STORAGE_VERSION_KEY]: STORAGE_VERSION,
+  });
   return state;
 }

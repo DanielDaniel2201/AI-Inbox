@@ -12,6 +12,8 @@ if (adapter) {
   const send = (message: unknown) => {
     void chrome.runtime.sendMessage(message).catch(() => undefined);
   };
+  send({ type: "content_ready" });
+
   const syncConversation = () => {
     const conversation = adapter.getConversation();
     const fingerprint = conversation

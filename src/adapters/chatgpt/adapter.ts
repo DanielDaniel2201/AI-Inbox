@@ -18,7 +18,6 @@ export const chatGPTAdapter = createDOMAdapter({
   id: "chatgpt",
   hosts: ["chatgpt.com"],
   conversation,
-  userSelector: selectors.user,
   assistantSelector: selectors.assistant,
   promptSelector: selectors.prompt,
   sendSelector: selectors.send,

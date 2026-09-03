@@ -8,7 +8,7 @@ export interface ConversationInfo {
 }
 
 export type AIEvent =
-  | { type: "prompt_submitted"; conversation: ConversationInfo }
+  | { type: "prompt_submitted"; conversation: ConversationInfo; prompt?: string }
   | { type: "response_started"; conversation: ConversationInfo }
   | {
       type: "response_completed";

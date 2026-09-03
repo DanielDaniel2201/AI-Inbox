@@ -1,6 +1,4 @@
 export const selectors = {
-  user:
-    '[data-message-author-role="user"], [data-role="user"], [class*="message"][class*="user"]',
   assistant:
     '[data-message-author-role="assistant"], [data-role="assistant"], .ds-assistant-message-main-content',
   prompt: 'textarea, [contenteditable="true"]',

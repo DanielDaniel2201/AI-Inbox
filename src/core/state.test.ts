@@ -4,6 +4,7 @@ import type { ConversationInfo } from "../adapters/types.ts";
 import {
   applyAIEvent,
   bindConversation,
+  clearPendingForTab,
   detachTab,
   emptyState,
   removeConversation,
@@ -19,12 +20,13 @@ const conversation: ConversationInfo = {
 test("conversation lifecycle and tab persistence", () => {
   let state = applyAIEvent(
     emptyState(),
-    { type: "prompt_submitted", conversation },
+    { type: "prompt_submitted", conversation, prompt: "How should I move?" },
     7,
     false,
     100,
   );
   assert.equal(Object.keys(state.pendingTasks).length, 1);
+  assert.equal(state.pendingTasks["chatgpt:abc"].latestPrompt, "How should I move?");
 
   state = applyAIEvent(
     state,
@@ -35,6 +37,7 @@ test("conversation lifecycle and tab persistence", () => {
   );
   assert.equal(Object.keys(state.pendingTasks).length, 0);
   assert.equal(state.inboxItems["chatgpt:abc"].completedAt, 200);
+  assert.equal(state.inboxItems["chatgpt:abc"].latestPrompt, "How should I move?");
 
   state = detachTab(state, 7);
   assert.equal(state.inboxItems["chatgpt:abc"].tabId, undefined);
@@ -42,6 +45,17 @@ test("conversation lifecycle and tab persistence", () => {
   assert.equal(state.inboxItems["chatgpt:abc"].tabId, 9);
   state = removeConversation(state, conversation);
   assert.equal(Object.keys(state.inboxItems).length, 0);
+});
+
+test("page reload clears stale pending work for that tab", () => {
+  const state = applyAIEvent(
+    emptyState(),
+    { type: "prompt_submitted", conversation, prompt: "old prompt" },
+    7,
+    false,
+  );
+  assert.equal(Object.keys(clearPendingForTab(state, 7).pendingTasks).length, 0);
+  assert.equal(Object.keys(clearPendingForTab(state, 8).pendingTasks).length, 1);
 });
 
 test("a focused completion never enters the inbox", () => {

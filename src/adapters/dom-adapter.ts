@@ -4,7 +4,6 @@ interface DOMAdapterConfig {
   id: Provider;
   hosts: string[];
   conversation(): ConversationInfo | null;
-  userSelector: string;
   assistantSelector: string;
   promptSelector: string;
   sendSelector: string;
@@ -12,8 +11,10 @@ interface DOMAdapterConfig {
   fallbackIdleMs?: number;
 }
 
-const count = (selector: string) => document.querySelectorAll(selector).length;
-const exists = (selector: string) => Boolean(document.querySelector(selector));
+const isVisible = (element: HTMLElement) =>
+  element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden";
+const exists = (selector: string) =>
+  Array.from(document.querySelectorAll<HTMLElement>(selector)).some(isVisible);
 
 export function createDOMAdapter(config: DOMAdapterConfig): AIAdapter {
   return {
@@ -27,20 +28,25 @@ export function createDOMAdapter(config: DOMAdapterConfig): AIAdapter {
     },
     getConversation: config.conversation,
     observe(emit) {
-      let userCount = count(config.userSelector);
       let generating = exists(config.stopSelector);
       let pending = generating;
       let assistantAtPrompt = lastAssistantText(config.assistantSelector);
       let idleTimer: ReturnType<typeof setTimeout> | undefined;
+      let waitingPrompt = "";
 
       const conversation = () => config.conversation();
-      const emitPrompt = () => {
-        if (pending) return;
+      const emitPrompt = (value = promptText(config.promptSelector)) => {
+        const prompt = value.trim().slice(0, 240);
+        if (pending || !prompt) return;
         const current = conversation();
-        if (!current) return;
+        if (!current) {
+          waitingPrompt = prompt;
+          return;
+        }
         pending = true;
+        waitingPrompt = "";
         assistantAtPrompt = lastAssistantText(config.assistantSelector);
-        emit({ type: "prompt_submitted", conversation: current });
+        emit({ type: "prompt_submitted", conversation: current, prompt });
       };
       const complete = () => {
         const current = conversation();
@@ -67,17 +73,14 @@ export function createDOMAdapter(config: DOMAdapterConfig): AIAdapter {
         }, config.fallbackIdleMs);
       };
       const evaluate = () => {
-        const nextUserCount = count(config.userSelector);
-        if (nextUserCount > userCount) emitPrompt();
-        userCount = nextUserCount;
+        if (waitingPrompt && !pending) emitPrompt(waitingPrompt);
 
         const nextGenerating = exists(config.stopSelector);
         if (nextGenerating && !generating) {
           generating = true;
-          pending = true;
           clearTimeout(idleTimer);
           const current = conversation();
-          if (current) emit({ type: "response_started", conversation: current });
+          if (pending && current) emit({ type: "response_started", conversation: current });
         } else if (!nextGenerating && generating) {
           generating = false;
           complete();
@@ -96,12 +99,12 @@ export function createDOMAdapter(config: DOMAdapterConfig): AIAdapter {
           !event.isComposing &&
           (event.target as Element)?.matches?.(config.promptSelector)
         ) {
-          queueMicrotask(emitPrompt);
+          emitPrompt();
         }
       };
       const onClick = (event: MouseEvent) => {
         if ((event.target as Element)?.closest?.(config.sendSelector)) {
-          queueMicrotask(emitPrompt);
+          emitPrompt();
         }
       };
 
@@ -126,4 +129,12 @@ export function createDOMAdapter(config: DOMAdapterConfig): AIAdapter {
 function lastAssistantText(selector: string): string {
   const elements = document.querySelectorAll<HTMLElement>(selector);
   return elements.item(elements.length - 1)?.innerText.trim() ?? "";
+}
+
+function promptText(selector: string): string {
+  const element = Array.from(document.querySelectorAll<HTMLElement>(selector)).find(isVisible);
+  const text = element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement
+    ? element.value
+    : element?.innerText;
+  return text?.trim().slice(0, 240) ?? "";
 }

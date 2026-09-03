@@ -18,7 +18,6 @@ export const deepSeekAdapter = createDOMAdapter({
   id: "deepseek",
   hosts: ["chat.deepseek.com"],
   conversation,
-  userSelector: selectors.user,
   assistantSelector: selectors.assistant,
   promptSelector: selectors.prompt,
   sendSelector: selectors.send,

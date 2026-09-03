@@ -19,25 +19,33 @@ export function applyAIEvent(
 
   if (event.type !== "response_completed") {
     const existing = pendingTasks[id];
+    const title = conversation.title ?? existing?.conversationTitle;
+    const prompt = event.type === "prompt_submitted" ? event.prompt : existing?.latestPrompt;
+    delete inboxItems[id];
     pendingTasks[id] = {
       id,
       provider: conversation.provider,
       conversationId: conversation.conversationId,
+      ...(title ? { conversationTitle: title } : {}),
       conversationUrl: conversation.url,
+      ...(prompt ? { latestPrompt: prompt } : {}),
       tabId,
       startedAt: existing?.startedAt ?? now,
     } satisfies PendingTask;
   } else {
+    const pending = pendingTasks[id];
     delete pendingTasks[id];
     if (attended) {
       delete inboxItems[id];
     } else {
+      const title = conversation.title ?? pending?.conversationTitle;
       inboxItems[id] = {
         id,
         provider: conversation.provider,
         conversationId: conversation.conversationId,
-        ...(conversation.title ? { conversationTitle: conversation.title } : {}),
+        ...(title ? { conversationTitle: title } : {}),
         conversationUrl: conversation.url,
+        ...(pending?.latestPrompt ? { latestPrompt: pending.latestPrompt } : {}),
         ...(event.preview ? { preview: event.preview } : {}),
         tabId,
         completedAt: now,
@@ -97,6 +105,15 @@ export function dismissItem(state: AIInboxState, id: string): AIInboxState {
   const inboxItems = { ...state.inboxItems };
   delete inboxItems[id];
   return { ...state, inboxItems };
+}
+
+export function clearPendingForTab(state: AIInboxState, tabId: number): AIInboxState {
+  const pendingTasks = Object.fromEntries(
+    Object.entries(state.pendingTasks).filter(([, task]) => task.tabId !== tabId),
+  );
+  return Object.keys(pendingTasks).length === Object.keys(state.pendingTasks).length
+    ? state
+    : { ...state, pendingTasks };
 }
 
 export function detachTab(state: AIInboxState, tabId: number): AIInboxState {

@@ -4,7 +4,9 @@ export interface PendingTask {
   id: string;
   provider: Provider;
   conversationId: string;
+  conversationTitle?: string;
   conversationUrl: string;
+  latestPrompt?: string;
   tabId: number;
   startedAt: number;
 }
@@ -15,6 +17,7 @@ export interface InboxItem {
   conversationId: string;
   conversationTitle?: string;
   conversationUrl: string;
+  latestPrompt?: string;
   preview?: string;
   tabId?: number;
   completedAt: number;
