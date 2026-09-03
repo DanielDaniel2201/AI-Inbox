@@ -58,6 +58,36 @@ test("page reload clears stale pending work for that tab", () => {
   assert.equal(Object.keys(clearPendingForTab(state, 8).pendingTasks).length, 1);
 });
 
+test("a temporary conversation id is reconciled on the same tab", () => {
+  const temporary = { ...conversation, conversationId: "WEB:temp", url: "https://chatgpt.com/c/WEB:temp" };
+  let state = applyAIEvent(
+    emptyState(),
+    { type: "prompt_submitted", conversation: temporary, prompt: "Critique holidays" },
+    7,
+    false,
+    100,
+  );
+  state = applyAIEvent(
+    state,
+    { type: "response_started", conversation },
+    7,
+    false,
+    110,
+  );
+  assert.deepEqual(Object.keys(state.pendingTasks), ["chatgpt:abc"]);
+  assert.equal(state.pendingTasks["chatgpt:abc"].latestPrompt, "Critique holidays");
+
+  state = applyAIEvent(
+    state,
+    { type: "response_completed", conversation },
+    7,
+    false,
+    200,
+  );
+  assert.equal(Object.keys(state.pendingTasks).length, 0);
+  assert.equal(state.inboxItems["chatgpt:abc"].latestPrompt, "Critique holidays");
+});
+
 test("a focused completion never enters the inbox", () => {
   const state = applyAIEvent(
     emptyState(),

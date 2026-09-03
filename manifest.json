@@ -3,7 +3,7 @@
   "name": "AI Inbox",
   "version": "0.1.0",
   "description": "Unread AI replies from ChatGPT and DeepSeek in one inbox.",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["tabs"],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://chat.deepseek.com/*"

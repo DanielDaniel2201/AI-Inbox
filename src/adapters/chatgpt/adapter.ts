@@ -4,7 +4,7 @@ import { selectors } from "./selectors";
 
 function conversation(): ConversationInfo | null {
   const id = location.pathname.match(/(?:^|\/)c\/([^/?#]+)/)?.[1];
-  if (!id) return null;
+  if (!id || /^WEB:/i.test(id)) return null;
   const title = document.title.replace(/\s*[-–|]\s*ChatGPT\s*$/i, "").trim();
   return {
     provider: "chatgpt",

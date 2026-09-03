@@ -1,7 +1,7 @@
 import type { AIEvent, ConversationInfo, Provider } from "../adapters/types";
 import { AttentionManager } from "../core/attention-manager";
-import { clearPendingForTab, detachTab, dismissItem } from "../core/state";
-import { initializeState, readState, STORAGE_KEY, updateState } from "../core/storage";
+import { clearPendingForTab, detachTab } from "../core/state";
+import { onStateChanged, readState, updateState } from "../core/store";
 import { handleAIEvent } from "../core/task-manager";
 import type { AIInboxState, InboxItem, PendingTask } from "../core/types";
 
@@ -14,6 +14,11 @@ const providerHosts: Record<Provider, string> = {
 };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "get_state") {
+    void readState().then((state) => sendResponse({ state }));
+    return true;
+  }
+
   const run = async () => {
     if (message?.type === "content_ready" && sender.tab?.id !== undefined) {
       // ponytail: reload resets in-flight work; add request IDs before resuming it safely.
@@ -29,8 +34,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (validConversation(conversation, sender.tab.url)) {
         await attention.noteConversation(sender.tab.id, conversation);
       }
-    } else if (message?.type === "dismiss_item" && typeof message.id === "string") {
-      await updateState((state) => dismissItem(state, message.id));
     } else if (message?.type === "open_item" && typeof message.id === "string") {
       await openItem(message.id);
     }
@@ -62,13 +65,11 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   void updateState((state) => detachTab(state, tabId));
 });
 
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes[STORAGE_KEY]?.newValue) {
-    void updateAction(changes[STORAGE_KEY].newValue as AIInboxState);
-  }
+onStateChanged((state) => {
+  void updateAction(state);
+  void chrome.runtime.sendMessage({ type: "state_changed", state }).catch(() => undefined);
 });
-
-void initializeState().then(updateAction);
+void readState().then(updateAction);
 
 async function updateAction(state: AIInboxState): Promise<void> {
   clearInterval(iconAnimation);

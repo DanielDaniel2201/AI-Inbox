@@ -1,6 +1,6 @@
 import type { ConversationInfo } from "../adapters/types";
 import { bindConversation, removeConversation } from "./state";
-import { updateState } from "./storage";
+import { updateState } from "./store";
 
 const READ_DELAY_MS = 1000;
 

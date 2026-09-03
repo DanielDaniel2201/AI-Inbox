@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { STORAGE_KEY } from "../core/storage";
 import type { AIInboxState, InboxItem, PendingTask } from "../core/types";
 
 const providerName = { chatgpt: "ChatGPT", deepseek: "DeepSeek" } as const;
@@ -19,19 +18,12 @@ export function App() {
   ];
 
   useEffect(() => {
-    const show = (next?: AIInboxState) => {
-      if (next) setState(next);
+    void chrome.runtime.sendMessage({ type: "get_state" }).then(({ state }) => setState(state));
+    const onMessage = (message: { type?: string; state?: AIInboxState }) => {
+      if (message.type === "state_changed" && message.state) setState(message.state);
     };
-    void chrome.storage.local.get(STORAGE_KEY).then((result) =>
-      show(result[STORAGE_KEY] as AIInboxState | undefined),
-    );
-    const onChanged = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
-      if (area === "local" && changes[STORAGE_KEY]) {
-        show(changes[STORAGE_KEY].newValue as AIInboxState | undefined);
-      }
-    };
-    chrome.storage.onChanged.addListener(onChanged);
-    return () => chrome.storage.onChanged.removeListener(onChanged);
+    chrome.runtime.onMessage.addListener(onMessage);
+    return () => chrome.runtime.onMessage.removeListener(onMessage);
   }, []);
 
   const open = async (id: string) => {

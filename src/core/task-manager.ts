@@ -1,6 +1,6 @@
 import type { AIEvent } from "../adapters/types";
 import { applyAIEvent } from "./state";
-import { updateState } from "./storage";
+import { updateState } from "./store";
 
 export async function handleAIEvent(
   event: AIEvent,

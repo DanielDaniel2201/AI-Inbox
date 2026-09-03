@@ -16,9 +16,12 @@ export function applyAIEvent(
   const id = conversationKey(conversation.provider, conversation.conversationId);
   const pendingTasks = { ...state.pendingTasks };
   const inboxItems = { ...state.inboxItems };
+  const existing = pendingTasks[id] ?? Object.values(pendingTasks).find(
+    (task) => task.tabId === tabId && task.provider === conversation.provider,
+  );
+  if (existing && existing.id !== id) delete pendingTasks[existing.id];
 
   if (event.type !== "response_completed") {
-    const existing = pendingTasks[id];
     const title = conversation.title ?? existing?.conversationTitle;
     const prompt = event.type === "prompt_submitted" ? event.prompt : existing?.latestPrompt;
     delete inboxItems[id];
@@ -33,7 +36,7 @@ export function applyAIEvent(
       startedAt: existing?.startedAt ?? now,
     } satisfies PendingTask;
   } else {
-    const pending = pendingTasks[id];
+    const pending = existing;
     delete pendingTasks[id];
     if (attended) {
       delete inboxItems[id];
@@ -94,13 +97,6 @@ export function removeConversation(
   conversation: ConversationInfo,
 ): AIInboxState {
   const id = conversationKey(conversation.provider, conversation.conversationId);
-  if (!state.inboxItems[id]) return state;
-  const inboxItems = { ...state.inboxItems };
-  delete inboxItems[id];
-  return { ...state, inboxItems };
-}
-
-export function dismissItem(state: AIInboxState, id: string): AIInboxState {
   if (!state.inboxItems[id]) return state;
   const inboxItems = { ...state.inboxItems };
   delete inboxItems[id];
