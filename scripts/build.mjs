@@ -22,4 +22,5 @@ await build({
 await Promise.all([
   cp("manifest.json", "dist/manifest.json"),
   cp("src/popup/index.html", "dist/popup.html"),
+  cp("src/popup/icons", "dist/icons", { recursive: true }),
 ]);
