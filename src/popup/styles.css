@@ -5,8 +5,8 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; }
-main { width: 320px; max-height: 460px; overflow: auto; }
+body { margin: 0; }
+main { width: max-content; min-width: 320px; max-width: 560px; max-height: 460px; overflow: auto; }
 ul { list-style: none; margin: 0; padding: 4px 10px; }
 li { align-items: center; display: flex; min-height: 44px; }
 li + li { border-top: 1px solid #ddd; }
