@@ -11,6 +11,7 @@ let iconFrame = 0;
 const providerHosts: Record<Provider, string> = {
   chatgpt: "chatgpt.com",
   deepseek: "chat.deepseek.com",
+  claude: "claude.ai",
 };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -161,7 +162,9 @@ function validConversation(value: unknown, senderUrl?: string): value is Convers
   if (!value || typeof value !== "object") return false;
   const conversation = value as Partial<ConversationInfo>;
   if (
-    (conversation.provider !== "chatgpt" && conversation.provider !== "deepseek") ||
+    (conversation.provider !== "chatgpt" &&
+      conversation.provider !== "deepseek" &&
+      conversation.provider !== "claude") ||
     typeof conversation.conversationId !== "string" ||
     !conversation.conversationId ||
     typeof conversation.url !== "string"

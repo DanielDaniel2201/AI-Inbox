@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { AIInboxState, InboxItem, PendingTask } from "../core/types";
 
-const providerName = { chatgpt: "ChatGPT", deepseek: "DeepSeek" } as const;
+const providerName = { chatgpt: "ChatGPT", deepseek: "DeepSeek", claude: "Claude" } as const;
 type Task =
   | { kind: "working"; value: PendingTask }
   | { kind: "unread"; value: InboxItem };

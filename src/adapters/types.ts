@@ -1,4 +1,4 @@
-export type Provider = "chatgpt" | "deepseek";
+export type Provider = "chatgpt" | "deepseek" | "claude";
 
 export interface ConversationInfo {
   provider: Provider;

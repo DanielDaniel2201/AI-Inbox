@@ -1,8 +1,9 @@
 import { chatGPTAdapter } from "../adapters/chatgpt/adapter";
+import { claudeAdapter } from "../adapters/claude/adapter";
 import { deepSeekAdapter } from "../adapters/deepseek/adapter";
 import type { ConversationInfo } from "../adapters/types";
 
-const adapter = [chatGPTAdapter, deepSeekAdapter].find((candidate) =>
+const adapter = [chatGPTAdapter, deepSeekAdapter, claudeAdapter].find((candidate) =>
   candidate.match(location.href),
 );
 

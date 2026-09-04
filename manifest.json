@@ -2,11 +2,12 @@
   "manifest_version": 3,
   "name": "AI Inbox",
   "version": "0.1.0",
-  "description": "Unread AI replies from ChatGPT and DeepSeek in one inbox.",
+  "description": "Unread AI replies from ChatGPT, DeepSeek, and Claude in one inbox.",
   "permissions": ["tabs"],
   "host_permissions": [
     "https://chatgpt.com/*",
-    "https://chat.deepseek.com/*"
+    "https://chat.deepseek.com/*",
+    "https://claude.ai/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -19,7 +20,8 @@
     {
       "matches": [
         "https://chatgpt.com/*",
-        "https://chat.deepseek.com/*"
+        "https://chat.deepseek.com/*",
+        "https://claude.ai/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

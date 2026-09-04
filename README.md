@@ -1,6 +1,6 @@
 # AI Inbox
 
-Chrome/Chromium extension that tracks working and unread ChatGPT or DeepSeek conversations.
+Chrome/Chromium extension that tracks working and unread ChatGPT, DeepSeek, or Claude conversations.
 
 ## Develop
 
